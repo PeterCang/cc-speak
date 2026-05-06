@@ -193,7 +193,8 @@ def speak_edge_tts(text: str, voice: str) -> None:
             f"text = {repr(text)}",
             "ret = subprocess.call(",
             "    ['edge-tts', '--voice', voice, '--text', text, '--write-media', tmp],",
-            "    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)",
+            "    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,",
+            "    creationflags=0x08000000)",  # CREATE_NO_WINDOW
             "if ret == 0 and os.path.exists(tmp):",
             "    winmm = ctypes.windll.winmm",
             "    winmm.mciSendStringW('open \"' + tmp + '\" type mpegvideo alias cc_speak', None, 0, None)",
