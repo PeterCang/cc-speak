@@ -26,7 +26,7 @@ python3 -c "import edge_tts; print('edge-tts OK')" 2>/dev/null || echo "EDGE_TTS
 If the output is `EDGE_TTS_MISSING`, install it now:
 
 ```bash
-pip install edge-tts 2>&1 | tail -3
+python3 -m pip install edge-tts --break-system-packages 2>&1 | tail -3
 python3 -c "import edge_tts; print('edge-tts installed OK')" 2>/dev/null || echo "INSTALL_FAILED"
 ```
 
