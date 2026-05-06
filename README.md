@@ -19,6 +19,15 @@ The install skill automatically checks for `edge-tts` and installs it if missing
 
 Restart Claude Code after install. That's it — Claude will read aloud after every task.
 
+## Update
+
+```bash
+claude plugin marketplace update cc-speak
+claude plugin update cc-speak@cc-speak --scope user
+```
+
+The hook runs from the marketplace clone (`~/.claude/plugins/marketplaces/cc-speak/`), so updates take effect immediately without restarting Claude Code.
+
 ## Configuration
 
 Edit `~/.config/cc-speak/config.json`:
