@@ -9,7 +9,7 @@
       "name": "cc-speak",
       "source": "./",
       "description": "Reads aloud the last Claude Code assistant message after each task completes, using edge-tts",
-      "version": "1.0.5",
+      "version": "1.0.6",
       "category": "productivity"
     }
   ]

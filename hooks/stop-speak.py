@@ -174,18 +174,6 @@ def detect_language(text: str) -> str:
 # TTS via edge-tts (cross-platform detached process)
 # ---------------------------------------------------------------------------
 
-def _get_player() -> list:
-    """Return the audio player command for the current platform."""
-    if sys.platform == "darwin":
-        return ["afplay"]
-    elif sys.platform == "win32":
-        # PowerShell's SoundPlayer — built-in on all Windows 10+
-        return ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command",
-                "(New-Object Media.SoundPlayer '{path}').PlaySync()"]
-    else:
-        return ["aplay"]
-
-
 def speak_edge_tts(text: str, voice: str) -> None:
     """
     Launch edge-tts in a detached background process.
@@ -195,17 +183,27 @@ def speak_edge_tts(text: str, voice: str) -> None:
     tmp = tempfile.mktemp(suffix=".mp3", prefix="cc-speak-")
 
     if sys.platform == "win32":
-        # Windows: use CREATE_NO_WINDOW + DETACHED_PROCESS
-        script = (
-            f"import subprocess, os;"
-            f"ret = subprocess.call(['edge-tts','--voice','{voice}','--text',{repr(text)},'--write-media',{repr(tmp)}],"
-            f"stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
-            f"ret==0 and os.path.exists({repr(tmp)}) and ("
-            f"subprocess.call(['powershell','-NoProfile','-WindowStyle','Hidden','-Command',"
-            f"\"(New-Object Media.SoundPlayer '{tmp}').PlaySync()\"],"
-            f"stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL),"
-            f"os.unlink({repr(tmp)}))"
-        )
+        # Windows: use CREATE_NO_WINDOW + DETACHED_PROCESS.
+        # Use Windows MCI (winmm) via ctypes — supports MP3 natively.
+        # Media.SoundPlayer only supports WAV and cannot play edge-tts output.
+        script = "\n".join([
+            "import subprocess, os, ctypes",
+            f"tmp = {repr(tmp)}",
+            f"voice = {repr(voice)}",
+            f"text = {repr(text)}",
+            "ret = subprocess.call(",
+            "    ['edge-tts', '--voice', voice, '--text', text, '--write-media', tmp],",
+            "    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)",
+            "if ret == 0 and os.path.exists(tmp):",
+            "    winmm = ctypes.windll.winmm",
+            "    winmm.mciSendStringW('open \"' + tmp + '\" type mpegvideo alias cc_speak', None, 0, None)",
+            "    winmm.mciSendStringW('play cc_speak wait', None, 0, None)",
+            "    winmm.mciSendStringW('close cc_speak', None, 0, None)",
+            "    try:",
+            "        os.unlink(tmp)",
+            "    except OSError:",
+            "        pass",
+        ])
         subprocess.Popen(
             [sys.executable, "-c", script],
             stdin=subprocess.DEVNULL,
