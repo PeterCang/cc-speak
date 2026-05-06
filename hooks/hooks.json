@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/run.sh",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/run.py 2>/dev/null || python ${CLAUDE_PLUGIN_ROOT}/hooks/run.py",
             "timeout": 5000,
             "description": "cc-speak: TTS for last assistant message"
           }
