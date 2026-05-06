@@ -55,12 +55,51 @@ PLUGIN_DIR=$(find "$HOME/.claude/plugins/marketplaces" -maxdepth 1 -name "cc-spe
 if [ -z "$PLUGIN_DIR" ]; then
   echo "NOT_FOUND"
 else
-  chmod +x "$PLUGIN_DIR/hooks/stop-speak.py"
-  echo "HOOK_READY: $PLUGIN_DIR/hooks/stop-speak.py"
+  chmod +x "$PLUGIN_DIR/hooks/stop-speak.py" "$PLUGIN_DIR/hooks/run.sh" 2>/dev/null
+  echo "HOOK_READY: $PLUGIN_DIR"
 fi
 ```
 
 If the output is `NOT_FOUND`, tell the user to run `claude plugin marketplace add PeterCang/cc-speak` first and stop.
+
+## Step 4 — Remove any legacy settings.json entries (prevent double-firing)
+
+The hook is auto-loaded from `hooks/hooks.json`. Any old cc-speak entries in `settings.json` from a previous install will cause the hook to fire twice. Remove them:
+
+```bash
+python3 - <<'PY' 2>/dev/null || python - <<'PY' 2>/dev/null || echo "CLEANUP_SKIPPED"
+import json, os, tempfile
+settings_path = os.path.expanduser("~/.claude/settings.json")
+if not os.path.exists(settings_path):
+    print("SETTINGS_NOT_FOUND")
+    raise SystemExit(0)
+with open(settings_path) as f:
+    settings = json.load(f)
+hooks = settings.get("hooks", {})
+removed = 0
+if "Stop" in hooks and isinstance(hooks["Stop"], list):
+    cleaned = []
+    for entry in hooks["Stop"]:
+        if not isinstance(entry, dict):
+            cleaned.append(entry); continue
+        filtered = [h for h in entry.get("hooks", [])
+                    if "cc-speak" not in h.get("command", "")
+                    and "stop-speak" not in h.get("command", "")]
+        removed += len(entry.get("hooks", [])) - len(filtered)
+        if filtered:
+            cleaned.append({**entry, "hooks": filtered})
+    hooks["Stop"] = cleaned
+if removed == 0:
+    print("NO_LEGACY_ENTRIES")
+    raise SystemExit(0)
+dir_ = os.path.dirname(settings_path)
+fd, tmp = tempfile.mkstemp(dir=dir_, suffix=".json.tmp")
+with os.fdopen(fd, "w") as f:
+    json.dump(settings, f, indent=2, ensure_ascii=False); f.write("\n")
+os.replace(tmp, settings_path)
+print(f"REMOVED_{removed}_LEGACY_ENTRIES")
+PY
+```
 
 ## Step 4 — Install default config
 
