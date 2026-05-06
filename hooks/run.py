@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stop-speak.py")
-stdin_data = sys.stdin.buffer.read()
+stdin_data = sys.stdin.buffer.read()  # read all stdin upfront
 
 subprocess.run(
     [sys.executable, script],

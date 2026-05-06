@@ -74,7 +74,15 @@ tail -f /tmp/cc-speak.log
 
 - Python 3.6+
 - `edge-tts` (auto-installed by `/cc-speak:install`)
-- macOS: `afplay` (built-in) / Linux: `aplay`
+- macOS: `afplay` (built-in) / Linux: `aplay` / Windows: PowerShell `SoundPlayer` (built-in)
+
+## Supported Platforms
+
+| Platform | Status |
+|----------|--------|
+| macOS | Tested ✓ |
+| Windows | Tested ✓ |
+| Linux | Should work (requires `aplay`) |
 
 ## License
 
