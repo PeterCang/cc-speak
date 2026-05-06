@@ -13,7 +13,18 @@ the Claude Code plugin system — no `settings.json` registration needed.
 ## Step 1 — Check Python
 
 ```bash
-python3 --version 2>/dev/null || echo "PYTHON_NOT_FOUND"
+if command -v python3 >/dev/null 2>&1; then
+  python3 --version
+elif command -v python >/dev/null 2>&1; then
+  PY_MAJOR=$(python -c "import sys; print(sys.version_info.major)" 2>/dev/null)
+  if [ "$PY_MAJOR" = "3" ]; then
+    python --version
+  else
+    echo "PYTHON_NOT_FOUND"
+  fi
+else
+  echo "PYTHON_NOT_FOUND"
+fi
 ```
 
 If the output is `PYTHON_NOT_FOUND`, tell the user Python 3 is required and stop.
@@ -21,14 +32,16 @@ If the output is `PYTHON_NOT_FOUND`, tell the user Python 3 is required and stop
 ## Step 2 — Check and install edge-tts
 
 ```bash
-python3 -c "import edge_tts; print('edge-tts OK')" 2>/dev/null || echo "EDGE_TTS_MISSING"
+PYTHON=$(command -v python3 2>/dev/null || command -v python 2>/dev/null)
+"$PYTHON" -c "import edge_tts; print('edge-tts OK')" 2>/dev/null || echo "EDGE_TTS_MISSING"
 ```
 
 If the output is `EDGE_TTS_MISSING`, install it now:
 
 ```bash
-python3 -m pip install edge-tts --break-system-packages 2>&1 | tail -3
-python3 -c "import edge_tts; print('edge-tts installed OK')" 2>/dev/null || echo "INSTALL_FAILED"
+PYTHON=$(command -v python3 2>/dev/null || command -v python 2>/dev/null)
+"$PYTHON" -m pip install edge-tts --break-system-packages 2>&1 | tail -3
+"$PYTHON" -c "import edge_tts; print('edge-tts installed OK')" 2>/dev/null || echo "INSTALL_FAILED"
 ```
 
 If the output is `INSTALL_FAILED`, tell the user to run `python3 -m pip install edge-tts --break-system-packages` manually and stop.
