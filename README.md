@@ -35,7 +35,7 @@ Edit `~/.config/cc-speak/config.json`:
 ```json
 {
   "enabled": true,
-  "edge_voice_zh": "zh-CN-XiaoxiaoNeural",
+  "edge_voice_zh": "zh-CN-YunxiNeural",
   "edge_voice_en": "en-US-JennyNeural",
   "max_chars": 300,
   "min_chars": 5,
@@ -46,7 +46,7 @@ Edit `~/.config/cc-speak/config.json`:
 | Field | Default | Description |
 |-------|---------|-------------|
 | `enabled` | `true` | Set to `false` to mute without uninstalling |
-| `edge_voice_zh` | `zh-CN-XiaoxiaoNeural` | Voice for Chinese text |
+| `edge_voice_zh` | `zh-CN-YunxiNeural` | Voice for Chinese text |
 | `edge_voice_en` | `en-US-JennyNeural` | Voice for English text |
 | `max_chars` | `300` | Max characters to speak (truncates at sentence boundary) |
 | `min_chars` | `5` | Skip responses shorter than this |
