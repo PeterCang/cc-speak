@@ -33,12 +33,26 @@ DEFAULTS = {
     "log_file": "/tmp/cc-speak.log",
 }
 
+# Values that were shipped as defaults in older versions.
+# If a user's config still holds one of these, it was never customised —
+# replace it silently with the current default so upgrades take effect.
+_LEGACY_DEFAULTS = {
+    "edge_voice_zh": {"zh-CN-XiaoxiaoNeural"},
+    "edge_voice_en": set(),
+}
+
 
 def load_config() -> dict:
     cfg = dict(DEFAULTS)
     if CONFIG_PATH.exists():
         try:
-            cfg.update(json.loads(CONFIG_PATH.read_text()))
+            user = json.loads(CONFIG_PATH.read_text())
+            for key, value in user.items():
+                legacy = _LEGACY_DEFAULTS.get(key, set())
+                if value in legacy:
+                    # User never changed this from the old default; keep new default.
+                    continue
+                cfg[key] = value
         except Exception:
             pass
     return cfg
