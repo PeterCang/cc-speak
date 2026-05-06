@@ -171,46 +171,81 @@ def detect_language(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# TTS via edge-tts (double-fork for full detachment)
+# TTS via edge-tts (cross-platform detached process)
 # ---------------------------------------------------------------------------
+
+def _get_player() -> list:
+    """Return the audio player command for the current platform."""
+    if sys.platform == "darwin":
+        return ["afplay"]
+    elif sys.platform == "win32":
+        # PowerShell's SoundPlayer — built-in on all Windows 10+
+        return ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command",
+                "(New-Object Media.SoundPlayer '{path}').PlaySync()"]
+    else:
+        return ["aplay"]
+
 
 def speak_edge_tts(text: str, voice: str) -> None:
     """
-    Launch edge-tts in a fully detached grandchild process.
+    Launch edge-tts in a detached background process.
+    Uses double-fork on Unix, DETACHED_PROCESS flags on Windows.
     The hook exits immediately; TTS runs independently.
     """
-    pid = os.fork()
-    if pid == 0:
-        os.setsid()
-        pid2 = os.fork()
-        if pid2 == 0:
-            devnull = os.open("/dev/null", os.O_RDWR)
-            for fd in (0, 1, 2):
-                os.dup2(devnull, fd)
-            os.close(devnull)
+    tmp = tempfile.mktemp(suffix=".mp3", prefix="cc-speak-")
 
-            tmp = tempfile.mktemp(suffix=".mp3", prefix="cc-speak-")
-            ret = subprocess.call(
-                ["edge-tts", "--voice", voice, "--text", text, "--write-media", tmp],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            if ret == 0 and os.path.exists(tmp):
-                player = "afplay" if sys.platform == "darwin" else "aplay"
-                subprocess.call(
-                    [player, tmp],
+    if sys.platform == "win32":
+        # Windows: use CREATE_NO_WINDOW + DETACHED_PROCESS
+        script = (
+            f"import subprocess, os;"
+            f"ret = subprocess.call(['edge-tts','--voice','{voice}','--text',{repr(text)},'--write-media',{repr(tmp)}],"
+            f"stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL);"
+            f"ret==0 and os.path.exists({repr(tmp)}) and ("
+            f"subprocess.call(['powershell','-NoProfile','-WindowStyle','Hidden','-Command',"
+            f"\"(New-Object Media.SoundPlayer '{tmp}').PlaySync()\"],"
+            f"stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL),"
+            f"os.unlink({repr(tmp)}))"
+        )
+        subprocess.Popen(
+            [sys.executable, "-c", script],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NO_WINDOW,
+        )
+    else:
+        # Unix: double-fork to fully detach from Claude Code's process group
+        pid = os.fork()
+        if pid == 0:
+            os.setsid()
+            pid2 = os.fork()
+            if pid2 == 0:
+                devnull = os.open("/dev/null", os.O_RDWR)
+                for fd in (0, 1, 2):
+                    os.dup2(devnull, fd)
+                os.close(devnull)
+
+                ret = subprocess.call(
+                    ["edge-tts", "--voice", voice, "--text", text, "--write-media", tmp],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                 )
-                try:
-                    os.unlink(tmp)
-                except OSError:
-                    pass
-            os._exit(0)
+                if ret == 0 and os.path.exists(tmp):
+                    player = "afplay" if sys.platform == "darwin" else "aplay"
+                    subprocess.call(
+                        [player, tmp],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                    try:
+                        os.unlink(tmp)
+                    except OSError:
+                        pass
+                os._exit(0)
+            else:
+                os._exit(0)
         else:
-            os._exit(0)
-    else:
-        os.waitpid(pid, 0)
+            os.waitpid(pid, 0)
 
 
 # ---------------------------------------------------------------------------

@@ -40,7 +40,9 @@ If the output is `EDGE_TTS_MISSING`, install it now:
 
 ```bash
 PYTHON=$(command -v python3 2>/dev/null || command -v python 2>/dev/null)
-"$PYTHON" -m pip install edge-tts --break-system-packages 2>&1 | tail -3
+# macOS/Linux may need --break-system-packages; Windows does not
+"$PYTHON" -m pip install edge-tts --break-system-packages 2>&1 | grep -v "^note\|^hint\|^warning" || \
+"$PYTHON" -m pip install edge-tts 2>&1 | tail -3
 "$PYTHON" -c "import edge_tts; print('edge-tts installed OK')" 2>/dev/null || echo "INSTALL_FAILED"
 ```
 
