@@ -129,7 +129,7 @@ def extract_last_assistant_text(transcript_path: str) -> str | None:
 
 _STRIP_PATTERNS = [
     (re.compile(r"```[\w]*\n.*?```", re.DOTALL), " [代码块] "),
-    (re.compile(r"`[^`]+`"), ""),
+    (re.compile(r"`([^`]+)`"), r"\1"),
     (re.compile(r"^#{1,6}\s+", re.MULTILINE), ""),
     (re.compile(r"\*{1,3}([^*\n]+)\*{1,3}"), r"\1"),
     (re.compile(r"\[([^\]]+)\]\([^)]+\)"), r"\1"),
