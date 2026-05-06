@@ -1,6 +1,6 @@
 {
   "enabled": true,
-  "edge_voice_zh": "zh-CN-XiaoxiaoNeural",
+  "edge_voice_zh": "zh-CN-YunxiNeural",
   "edge_voice_en": "en-US-JennyNeural",
   "max_chars": 300,
   "min_chars": 5,

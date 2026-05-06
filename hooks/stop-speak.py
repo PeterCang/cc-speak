@@ -26,7 +26,7 @@ CONFIG_PATH = Path.home() / ".config" / "cc-speak" / "config.json"
 
 DEFAULTS = {
     "enabled": True,
-    "edge_voice_zh": "zh-CN-XiaoxiaoNeural",
+    "edge_voice_zh": "zh-CN-YunxiNeural",
     "edge_voice_en": "en-US-JennyNeural",
     "max_chars": 300,
     "min_chars": 5,
