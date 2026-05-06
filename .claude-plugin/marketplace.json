@@ -1,0 +1,16 @@
+{
+  "name": "cc-speak",
+  "owner": {
+    "name": "PeterCang",
+    "email": "github.com/PeterCang"
+  },
+  "plugins": [
+    {
+      "name": "cc-speak",
+      "source": "./",
+      "description": "Reads aloud the last Claude Code assistant message after each task completes, using edge-tts",
+      "version": "1.0.0",
+      "category": "productivity"
+    }
+  ]
+}

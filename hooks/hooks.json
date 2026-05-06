@@ -1,0 +1,17 @@
+{
+  "description": "cc-speak: read aloud last assistant message after each task",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/stop-speak.py",
+            "timeout": 5000,
+            "description": "cc-speak: TTS for last assistant message"
+          }
+        ]
+      }
+    ]
+  }
+}

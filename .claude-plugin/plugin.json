@@ -1,0 +1,13 @@
+{
+  "name": "cc-speak",
+  "description": "Claude Code plugin that reads aloud the last assistant message after each task completes, using edge-tts (Microsoft neural TTS).",
+  "version": "1.0.0",
+  "author": {
+    "name": "PeterCang",
+    "url": "https://github.com/PeterCang"
+  },
+  "homepage": "https://github.com/PeterCang/cc-speak",
+  "repository": "https://github.com/PeterCang/cc-speak",
+  "license": "MIT",
+  "keywords": ["tts", "voice", "speech", "accessibility", "productivity"]
+}
