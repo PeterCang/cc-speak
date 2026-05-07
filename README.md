@@ -19,6 +19,23 @@ The install skill automatically checks for `edge-tts` and installs it if missing
 
 Restart Claude Code after install. That's it — Claude will read aloud after every task.
 
+## Uninstall
+
+Inside Claude Code, run the uninstall skill first — it removes the config file
+and any legacy hook entries from `settings.json`:
+
+```
+/cc-speak:uninstall
+```
+
+Then remove the plugin package from your terminal:
+
+```bash
+claude plugin uninstall cc-speak@cc-speak --scope user
+```
+
+Restart Claude Code. TTS will no longer run after tasks.
+
 ## Update
 
 ```bash
