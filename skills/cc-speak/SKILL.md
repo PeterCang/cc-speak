@@ -172,4 +172,5 @@ Tell the user:
 > After restarting, Claude will read aloud the last message after each task.
 >
 > - Config: `~/.config/cc-speak/config.json`
-> - Logs: `tail -f /tmp/cc-speak.log`
+> - Logs (Windows): `%LOCALAPPDATA%\Temp\cc-speak.log`
+> - Logs (macOS/Linux): `/tmp/cc-speak.log`
