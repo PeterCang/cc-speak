@@ -11,6 +11,7 @@ TTS is launched in a detached background process (double-fork).
 
 import json
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -24,13 +25,20 @@ from pathlib import Path
 
 CONFIG_PATH = Path.home() / ".config" / "cc-speak" / "config.json"
 
+def _default_log_file() -> str:
+    if platform.system() == "Windows":
+        base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+        return str(base / "Temp" / "cc-speak.log")
+    return "/tmp/cc-speak.log"
+
+
 DEFAULTS = {
     "enabled": True,
     "edge_voice_zh": "zh-CN-YunxiNeural",
     "edge_voice_en": "en-US-JennyNeural",
     "max_chars": 300,
     "min_chars": 5,
-    "log_file": "/tmp/cc-speak.log",
+    "log_file": _default_log_file(),
 }
 
 # Values that were shipped as defaults in older versions.
@@ -39,6 +47,7 @@ DEFAULTS = {
 _LEGACY_DEFAULTS = {
     "edge_voice_zh": {"zh-CN-XiaoxiaoNeural"},
     "edge_voice_en": set(),
+    "log_file": {"/tmp/cc-speak.log"},
 }
 
 
@@ -48,6 +57,8 @@ def load_config() -> dict:
         try:
             user = json.loads(CONFIG_PATH.read_text())
             for key, value in user.items():
+                if value == "" or value is None:
+                    continue
                 legacy = _LEGACY_DEFAULTS.get(key, set())
                 if value in legacy:
                     # User never changed this from the old default; keep new default.
