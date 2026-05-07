@@ -45,6 +45,19 @@ claude plugin update cc-speak@cc-speak --scope user
 
 The hook runs from the marketplace clone (`~/.claude/plugins/marketplaces/cc-speak/`), so updates take effect immediately without restarting Claude Code.
 
+## Toggle TTS on/off
+
+You can mute and unmute cc-speak at any time without uninstalling it.
+
+Inside Claude Code:
+
+```
+/cc-speak:off   # stop reading aloud
+/cc-speak:on    # resume reading aloud
+```
+
+This sets `enabled` in `~/.config/cc-speak/config.json` and takes effect from the next task — no restart needed.
+
 ## Configuration
 
 Edit `~/.config/cc-speak/config.json`:
@@ -83,9 +96,22 @@ cc-speak registers a `Stop` hook. When Claude Code finishes a task:
 
 ## Debugging
 
+Log path varies by platform:
+
+- **Windows**: `%LOCALAPPDATA%\Temp\cc-speak.log`
+- **macOS / Linux**: `/tmp/cc-speak.log`
+
+Tail the log to watch what cc-speak is doing:
+
 ```bash
+# macOS / Linux
 tail -f /tmp/cc-speak.log
+
+# Windows (PowerShell)
+Get-Content "$env:LOCALAPPDATA\Temp\cc-speak.log" -Wait
 ```
+
+The log path can be changed or disabled (`""`) via the `log_file` field in the config.
 
 ## Requirements
 
